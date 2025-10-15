@@ -241,6 +241,51 @@ vwap = kdb.calculate_vwap('ticks', 'AAPL', interval='5m')
 
 See [KDB_INTEGRATION.md](docs/KDB_INTEGRATION.md) for full documentation.
 
+### 8. PostgreSQL + TimescaleDB + pgvector (New!)
+
+**Enterprise-grade database persistence with time-series and ML capabilities:**
+- **10-100x faster** time-series queries with TimescaleDB
+- **ACID transactions** for data integrity
+- **ML feature similarity** search with pgvector
+- **Automatic partitioning** and compression
+
+```python
+from qvp.data.postgres_connector import PostgreSQLConnector
+from qvp.data.vector_store import VectorStore
+
+# PostgreSQL for OHLCV, trades, portfolio
+pg = PostgreSQLConnector()
+pg.create_tables()
+
+# Insert market data (bulk operations)
+pg.insert_market_data(ohlcv_data)
+
+# TimescaleDB time-bucket aggregates
+hourly = pg.get_time_bucket_aggregates('SPY', interval='1 hour')
+weekly = pg.get_time_bucket_aggregates('SPY', interval='1 week')
+
+# Track trades and portfolio
+pg.insert_trade(timestamp, 'SPY', 'buy', 100, 450.50, strategy='mean_reversion')
+pg.insert_portfolio_value(timestamp, total_value=100000, cash=30000)
+
+# pgvector for ML feature similarity search
+vs = VectorStore(pg)
+vs.insert_feature_embedding('SPY', feature_vector, 'technical')
+similar = vs.find_similar_features(query_vector, top_k=10, metric='cosine')
+
+# Volatility regime matching
+current_market = {'realized_vol': 0.25, 'vix_level': 22, 'skew': -2.5}
+similar_regimes = vs.find_similar_regimes(current_market, top_k=5)
+```
+
+**Multi-Backend Storage Architecture:**
+- **PostgreSQL + TimescaleDB**: OHLCV data, trades, portfolio, risk metrics
+- **pgvector**: ML embeddings, strategy patterns, regime clustering  
+- **KDB+/Q**: Ultra-fast tick data and high-frequency queries
+- **Parquet/HDF5**: Long-term research and backtesting archives
+
+See [DATABASE_INTEGRATION.md](docs/DATABASE_INTEGRATION.md) for full documentation.
+
 
 
 ## 📁 Project Structure
@@ -430,17 +475,24 @@ Where:
 
 ## 🚀 Future Enhancements
 
-**Phase 2 (Planned):**
-- [ ] Interactive Dash dashboard
-- [ ] Live trading simulation (asyncio)
+**Phase 2 (Completed ✅):**
+- [x] Interactive Dash dashboard
+- [x] Live trading simulation (asyncio)
+- [x] Docker deployment
+- [x] WebSocket data feeds
+- [x] Real-time risk monitoring
+
+**Phase 3 (Completed ✅):**
+- [x] **Fourier spectral analysis** - Advanced frequency decomposition and cycle detection
+- [x] **KDB+/Q integration** - High-performance tick data storage (100x+ faster)
+- [x] **PostgreSQL + TimescaleDB** - Enterprise persistence with time-series optimization
+- [x] **pgvector** - ML feature similarity search and regime clustering
+
+**Phase 4 (Planned):**
 - [ ] Options Greeks calculator
 - [ ] Advanced execution models
-
-**Phase 3 (Implemented):**
-- [x] ML-based signal generation
-- [x] Alternative data integration  
-- [x] **KDB+/Q integration** - High-performance tick data storage and analytics
-- [x] Docker deployment
+- [ ] ML-based signal generation (deep learning)
+- [ ] Alternative data integration
 - [ ] HPC/Slurm scheduling
 
 ## 🎯 Learning Outcomes
