@@ -455,6 +455,14 @@ class BacktestEngine:
             symbol: Symbol identifier
             df: DataFrame with OHLCV data
         """
+        # Make a copy to avoid modifying original
+        df = df.copy()
+        
+        # Handle timezone-aware indices
+        if df.index.tz is not None:
+            # Convert to timezone-naive (localize start/end dates to match)
+            df.index = df.index.tz_localize(None)
+        
         # Filter to backtest date range
         df_filtered = df[
             (df.index >= self.start_date) & (df.index <= self.end_date)

@@ -1,3 +1,4 @@
+data/results
 # Python
 __pycache__/
 *.py[cod]
