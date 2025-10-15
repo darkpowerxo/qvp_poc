@@ -1,0 +1,169 @@
+# QVP Platform Configuration
+
+data:
+  symbols:
+    equity:
+      - SPY
+      - QQQ
+      - IWM
+    volatility:
+      - ^VIX
+      - ^VIX9D
+  date_range:
+    start: "2021-01-01"
+    end: "2024-12-31"
+  storage:
+    format: parquet  # parquet or hdf5
+    compression: snappy
+    path: ./data
+  quality_checks:
+    max_missing_pct: 0.05
+    min_volume: 1000
+    price_change_threshold: 0.5  # 50% daily move flagged
+
+volatility:
+  estimators:
+    - close_to_close
+    - parkinson
+    - garman_klass
+    - rogers_satchell
+    - yang_zhang
+  windows:
+    - 10
+    - 20
+    - 30
+    - 60
+  garch:
+    model: GARCH  # GARCH, EGARCH, GJR-GARCH
+    p: 1
+    q: 1
+    distribution: normal  # normal, t, skewt
+  implied_volatility:
+    interpolation_method: cubic
+    extrapolation: flat
+    min_moneyness: 0.8
+    max_moneyness: 1.2
+
+features:
+  rolling_windows:
+    - 5
+    - 10
+    - 20
+    - 60
+  technical_indicators:
+    - rsi
+    - macd
+    - bollinger_bands
+    - atr
+  ml_features:
+    pca_components: 5
+    standardize: true
+  regime_detection:
+    method: hmm  # hmm, threshold, clustering
+    n_regimes: 2
+
+strategies:
+  vix_mean_reversion:
+    enabled: true
+    entry_threshold: 1.5  # z-score
+    exit_threshold: 0.5
+    lookback_period: 20
+    position_size: 0.1
+  
+  vol_risk_premium:
+    enabled: true
+    min_premium: 0.02
+    holding_period: 5
+    rebalance_frequency: daily
+  
+  term_structure:
+    enabled: true
+    contango_threshold: 0.05
+    backwardation_threshold: -0.05
+
+backtest:
+  initial_capital: 1000000
+  start_date: "2021-01-01"
+  end_date: "2024-12-31"
+  frequency: daily  # daily, hourly, minute
+  transaction_costs:
+    commission_pct: 0.0005
+    slippage_bps: 2.0
+    min_commission: 1.0
+  execution:
+    fill_model: simple  # simple, volume_weighted, impact
+    delay_bars: 1  # execution delay
+  
+portfolio:
+  optimization:
+    method: mean_variance  # mean_variance, risk_parity, hrp
+    objective: sharpe  # sharpe, return, volatility
+    constraints:
+      max_position: 0.2
+      max_leverage: 2.0
+      max_turnover: 0.3
+      min_position: 0.01
+  rebalancing:
+    frequency: daily
+    threshold: 0.05  # rebalance if drift > 5%
+
+risk:
+  limits:
+    max_portfolio_vol: 0.15
+    max_drawdown: 0.15
+    max_var_95: 0.05
+    max_position_size: 0.2
+    max_sector_exposure: 0.4
+    max_delta: 100000
+    max_gamma: 50000
+    max_vega: 100000
+  metrics:
+    var_confidence: 0.95
+    cvar_confidence: 0.95
+    var_horizon_days: 1
+    stress_scenarios:
+      - market_crash
+      - vol_spike
+      - liquidity_crisis
+  monitoring:
+    check_frequency_seconds: 60
+    alert_threshold_pct: 0.8  # alert at 80% of limit
+
+analytics:
+  performance_metrics:
+    - sharpe_ratio
+    - sortino_ratio
+    - calmar_ratio
+    - max_drawdown
+    - win_rate
+    - profit_factor
+  attribution:
+    factors:
+      - market_beta
+      - volatility_beta
+      - momentum
+      - mean_reversion
+  reporting:
+    frequency: daily
+    generate_tearsheet: true
+
+live:
+  enabled: false
+  mode: paper  # paper or live
+  data_source: yahoo  # yahoo, polygon, alpaca
+  update_frequency_seconds: 60
+  order_management:
+    default_order_type: limit
+    timeout_seconds: 300
+    max_retry: 3
+  state_persistence:
+    save_frequency_seconds: 300
+    backup_enabled: true
+
+logging:
+  level: INFO  # DEBUG, INFO, WARNING, ERROR
+  format: "{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}"
+  rotation: "10 MB"
+  retention: "30 days"
+  backtrace: true
+  diagnose: true
