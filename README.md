@@ -1,10 +1,22 @@
-# Quantitative Volatility Platform (QVP)
+# Quantitative Volatility Platform (QVP) v2.0
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Docker](https://img.shields.io/badge/docker-ready-blue.svg)](https://www.docker.com/)
+[![Dash](https://img.shields.io/badge/dashboard-plotly%20dash-00BFFF.svg)](https://dash.plotly.com/)
 
 A comprehensive systematic volatility trading infrastructure demonstrating end-to-end capabilities from data ingestion through live simulation, highlighting technical proficiency in Python, quantitative finance, and production-grade system design.
+
+## ⭐ What's New in v2.0
+
+- **🐳 Docker Containerization** - Production-ready multi-service deployment
+- **📊 Interactive Dashboards** - Real-time Plotly/Dash visualization (5 pages)
+- **⚡ Live Trading Simulation** - AsyncIO-based real-time trading engine
+- **🌐 WebSocket Data Feeds** - Real-time market data with auto-reconnection
+- **🛡️ Risk Monitoring Dashboard** - Live risk metrics and alert system
+
+[See ADVANCED_FEATURES.md for details →](docs/ADVANCED_FEATURES.md)
 
 ## 🎯 Project Overview
 
@@ -36,7 +48,39 @@ uv run scripts/run_demo.py
 
 See [QUICKSTART.md](QUICKSTART.md) for detailed installation instructions.
 
-## 📊 Key Features
+## � New v2.0 Usage Examples
+
+### Docker Deployment
+```powershell
+# Start all services (dashboard, live sim, risk monitor)
+docker-compose up -d
+
+# Access dashboards
+# Main Dashboard: http://localhost:8050
+# Risk Monitor:   http://localhost:8052
+```
+
+### Interactive Dashboard
+```powershell
+uv run python -m qvp.dashboard.app
+```
+
+### Live Trading Simulation
+```powershell
+uv run python -m qvp.live.simulator
+```
+
+### Risk Monitoring
+```powershell
+uv run python -m qvp.dashboard.risk_monitor
+```
+
+### Run All Demos
+```powershell
+uv run python scripts/run_all_demos.py
+```
+
+## �📊 Key Features
 
 ### 1. Advanced Volatility Estimation
 
