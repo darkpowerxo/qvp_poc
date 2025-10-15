@@ -4,8 +4,26 @@
 
 Follow these steps to get started with the Quantitative Volatility Platform:
 
-### 1. Set up Python environment
+### 1. Install uv (Recommended)
 
+**uv** is a fast Python package installer and resolver, written in Rust.
+
+```powershell
+# Install uv
+pip install uv
+
+# Or use the standalone installer (see https://github.com/astral-sh/uv)
+```
+
+### 2. Install dependencies
+
+Using **uv** (recommended - much faster):
+```powershell
+# This will create .venv and install all dependencies
+uv sync
+```
+
+Alternative using traditional pip:
 ```powershell
 # Create virtual environment
 python -m venv venv
@@ -13,20 +31,11 @@ python -m venv venv
 # Activate (Windows PowerShell)
 .\venv\Scripts\Activate.ps1
 
-# Or activate (Windows CMD)
-venv\Scripts\activate.bat
-
-# Or activate (Linux/Mac)
-source venv/bin/activate
-```
-
-### 2. Install dependencies
-
-```powershell
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 3. Configure environment
+### 3. Configure environment (optional)
 
 ```powershell
 # Copy template
@@ -37,6 +46,12 @@ cp .env.template .env
 
 ### 4. Run the demo
 
+Using **uv**:
+```powershell
+uv run scripts/run_demo.py
+```
+
+Or with activated venv:
 ```powershell
 python scripts/run_demo.py
 ```
@@ -73,19 +88,30 @@ Profit Factor:               1.42
 
 ### Explore Jupyter Notebooks
 
+Open the interactive notebook in VS Code or Jupyter:
 ```powershell
-jupyter lab
-# Open notebooks/01_data_exploration.ipynb
+# Open in VS Code (recommended)
+code notebooks/01_demo_walkthrough.ipynb
+
+# Or use Jupyter
+uv run jupyter lab
+# Then open notebooks/01_demo_walkthrough.ipynb
 ```
 
 ### Run Tests
 
+Using **uv**:
 ```powershell
 # Run all tests
-pytest tests/ -v
+uv run pytest tests/ -v
 
 # With coverage report
-pytest tests/ --cov=qvp --cov-report=html
+uv run pytest tests/ --cov=qvp --cov-report=html
+```
+
+Or with activated venv:
+```powershell
+pytest tests/ -v
 ```
 
 ### Customize Configuration

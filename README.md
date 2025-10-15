@@ -24,15 +24,14 @@ QVP is a production-grade proof-of-concept platform for quantitative volatility 
 git clone <repository-url>
 cd qvp_poc
 
-# Create virtual environment
-python -m venv venv
-.\venv\Scripts\Activate.ps1
+# Install uv (if not already installed)
+pip install uv
 
-# Install dependencies
-pip install -r requirements.txt
+# Install dependencies (uv creates .venv automatically)
+uv sync
 
 # Run demo
-python scripts/run_demo.py
+uv run scripts/run_demo.py
 ```
 
 See [QUICKSTART.md](QUICKSTART.md) for detailed installation instructions.

@@ -184,15 +184,16 @@ The Quantitative Volatility Platform (QVP) has been successfully created as a co
 
 ## 🚀 How to Run
 
-### Minimal Example
+### Minimal Example (Using uv - Recommended)
 ```powershell
-# Setup
-python -m venv venv
-.\venv\Scripts\Activate.ps1
-pip install -r requirements.txt
+# Install uv (if not already installed)
+pip install uv
+
+# Install dependencies
+uv sync
 
 # Run demo
-python scripts/run_demo.py
+uv run scripts/run_demo.py
 ```
 
 ### Expected Runtime
