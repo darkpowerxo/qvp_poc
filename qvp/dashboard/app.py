@@ -85,11 +85,10 @@ def main():
     
     logger.info("Starting QVP Dashboard...")
     logger.info("Dashboard available at http://localhost:8050")
-    app.run_server(
+    app.run(
         debug=True,
         host='0.0.0.0',
-        port=8050,
-        dev_tools_hot_reload=True
+        port=8050
     )
 
 

@@ -473,7 +473,7 @@ def main():
     """Run the risk monitoring dashboard."""
     logger.info("Starting Risk Monitoring Dashboard...")
     logger.info("Dashboard available at http://localhost:8052")
-    app.run_server(
+    app.run(
         debug=True,
         host='0.0.0.0',
         port=8052

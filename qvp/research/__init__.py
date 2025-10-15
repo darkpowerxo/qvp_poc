@@ -11,6 +11,14 @@ from qvp.research.features import (
     RegimeDetection,
     MLFeatureEngine
 )
+from qvp.research.fourier import (
+    FourierSeriesAnalyzer,
+    VolatilityFourierAnalyzer,
+    FourierComponent,
+    fourier_smooth,
+    extract_cycles,
+    compare_frequency_domains
+)
 
 __all__ = [
     'VolatilityEstimator',
@@ -22,4 +30,10 @@ __all__ = [
     'RollingStatistics',
     'RegimeDetection',
     'MLFeatureEngine',
+    'FourierSeriesAnalyzer',
+    'VolatilityFourierAnalyzer',
+    'FourierComponent',
+    'fourier_smooth',
+    'extract_cycles',
+    'compare_frequency_domains',
 ]
