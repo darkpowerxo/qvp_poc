@@ -1,0 +1,101 @@
+version: '3.8'
+
+services:
+  # Main QVP Application
+  qvp-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: qvp-platform
+    ports:
+      - "8050:8050"  # Dash dashboard
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./config:/app/config
+    environment:
+      - QVP_ENV=production
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    restart: unless-stopped
+    networks:
+      - qvp-network
+
+  # Interactive Dashboard Service
+  qvp-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: qvp-dashboard
+    command: python -m qvp.dashboard.app
+    ports:
+      - "8051:8050"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./config:/app/config
+    environment:
+      - QVP_ENV=production
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    depends_on:
+      - qvp-app
+    restart: unless-stopped
+    networks:
+      - qvp-network
+
+  # Live Trading Simulation Service
+  qvp-live:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: qvp-live-sim
+    command: python -m qvp.live.simulator
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./config:/app/config
+    environment:
+      - QVP_ENV=production
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    depends_on:
+      - qvp-app
+    restart: unless-stopped
+    networks:
+      - qvp-network
+
+  # Risk Monitoring Dashboard
+  qvp-risk-monitor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: qvp-risk-monitor
+    command: python -m qvp.dashboard.risk_monitor
+    ports:
+      - "8052:8050"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./config:/app/config
+    environment:
+      - QVP_ENV=production
+      - PYTHONUNBUFFERED=1
+    env_file:
+      - .env
+    depends_on:
+      - qvp-app
+    restart: unless-stopped
+    networks:
+      - qvp-network
+
+networks:
+  qvp-network:
+    driver: bridge
+
+volumes:
+  qvp-data:
+  qvp-logs:
