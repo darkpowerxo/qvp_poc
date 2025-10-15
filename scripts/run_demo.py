@@ -4,6 +4,7 @@ Shows complete workflow from data download to performance analysis
 """
 
 import sys
+import os
 import argparse
 from pathlib import Path
 import pandas as pd
@@ -46,6 +47,13 @@ def main():
     """
     # Parse command line arguments
     args = parse_args()
+    
+    # Set SSL environment variables if native-tls is enabled
+    if args.native_tls:
+        os.environ['CURL_CA_BUNDLE'] = ''
+        os.environ['REQUESTS_CA_BUNDLE'] = ''
+        os.environ['SSL_CERT_FILE'] = ''
+        logger.warning("SSL verification disabled via environment variables")
     
     logger.info("=" * 80)
     logger.info("QVP - Quantitative Volatility Platform Demo")

@@ -41,6 +41,59 @@ class DataIngester:
             # Disable SSL warnings
             import urllib3
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+            
+            # Set environment variables to disable SSL verification for curl-based backends
+            import os
+            os.environ['CURL_CA_BUNDLE'] = ''
+            os.environ['REQUESTS_CA_BUNDLE'] = ''
+            os.environ['SSL_CERT_FILE'] = ''
+            os.environ['SSL_CERT_DIR'] = ''
+            
+            # Monkey-patch yfinance to disable SSL verification
+            import ssl
+            ssl._create_default_https_context = ssl._create_unverified_context
+            
+            # Patch curl_cffi to disable SSL verification
+            try:
+                from curl_cffi import requests as curl_requests
+                original_request = curl_requests.Session.request
+                
+                def patched_request(self, method, url, **kwargs):
+                    # Force SSL verification to False
+                    kwargs['verify'] = False
+                    return original_request(self, method, url, **kwargs)
+                
+                curl_requests.Session.request = patched_request
+                logger.debug("Successfully patched curl_cffi SSL verification")
+            except ImportError:
+                logger.debug("curl_cffi not found, skipping patch")
+            
+        # Create a custom session for yfinance
+        self.session = requests.Session()
+        self.session.verify = self.verify_ssl
+        if not verify_ssl:
+            # Additional adapter configuration
+            from requests.adapters import HTTPAdapter
+            from urllib3.util.retry import Retry
+            from urllib3.util.ssl_ import create_urllib3_context
+            
+            # Create custom SSL context
+            class SSLAdapter(HTTPAdapter):
+                def init_poolmanager(self, *args, **kwargs):
+                    context = create_urllib3_context()
+                    context.check_hostname = False
+                    context.verify_mode = ssl.CERT_NONE
+                    kwargs['ssl_context'] = context
+                    return super().init_poolmanager(*args, **kwargs)
+            
+            retry_strategy = Retry(
+                total=3,
+                backoff_factor=1,
+                status_forcelist=[429, 500, 502, 503, 504]
+            )
+            adapter = SSLAdapter(max_retries=retry_strategy)
+            self.session.mount("http://", adapter)
+            self.session.mount("https://", adapter)
     
     def download_equity_data(
         self,
@@ -80,11 +133,7 @@ class DataIngester:
             # Download from yfinance
             try:
                 ticker = yf.Ticker(symbol)
-                
-                # Create session with SSL settings
-                session = requests.Session()
-                session.verify = self.verify_ssl
-                ticker.session = session
+                ticker.session = self.session
                 
                 df = ticker.history(
                     start=start_date,
@@ -143,11 +192,7 @@ class DataIngester:
         # Download
         try:
             ticker = yf.Ticker(symbol)
-            
-            # Create session with SSL settings
-            session = requests.Session()
-            session.verify = self.verify_ssl
-            ticker.session = session
+            ticker.session = self.session
             
             df = ticker.history(start=start_date, end=end_date, interval="1d")
             
@@ -193,11 +238,7 @@ class DataIngester:
         
         try:
             ticker = yf.Ticker(symbol)
-            
-            # Create session with SSL settings
-            session = requests.Session()
-            session.verify = self.verify_ssl
-            ticker.session = session
+            ticker.session = self.session
             
             # Get available expiration dates
             expirations = ticker.options
