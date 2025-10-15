@@ -9,6 +9,7 @@ from typing import Dict, List, Optional, Tuple
 import pandas as pd
 import numpy as np
 import yfinance as yf
+import requests
 from loguru import logger
 
 from qvp.config import config
@@ -20,17 +21,26 @@ class DataIngester:
     Primary source: yfinance for equity and volatility index data.
     """
     
-    def __init__(self, data_dir: Optional[Path] = None):
+    def __init__(self, data_dir: Optional[Path] = None, verify_ssl: bool = True):
         """
         Initialize data ingester
         
         Args:
             data_dir: Directory to store downloaded data
+            verify_ssl: Whether to verify SSL certificates (set to False to bypass SSL errors)
         """
         self.data_dir = data_dir or config.data_dir
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.cache_dir = self.data_dir / "cache"
         self.cache_dir.mkdir(parents=True, exist_ok=True)
+        self.verify_ssl = verify_ssl
+        
+        # Configure session for yfinance
+        if not verify_ssl:
+            logger.warning("SSL verification disabled - this is not recommended for production use")
+            # Disable SSL warnings
+            import urllib3
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     
     def download_equity_data(
         self,
@@ -70,6 +80,12 @@ class DataIngester:
             # Download from yfinance
             try:
                 ticker = yf.Ticker(symbol)
+                
+                # Create session with SSL settings
+                session = requests.Session()
+                session.verify = self.verify_ssl
+                ticker.session = session
+                
                 df = ticker.history(
                     start=start_date,
                     end=end_date,
@@ -127,6 +143,12 @@ class DataIngester:
         # Download
         try:
             ticker = yf.Ticker(symbol)
+            
+            # Create session with SSL settings
+            session = requests.Session()
+            session.verify = self.verify_ssl
+            ticker.session = session
+            
             df = ticker.history(start=start_date, end=end_date, interval="1d")
             
             if df.empty:
@@ -171,6 +193,11 @@ class DataIngester:
         
         try:
             ticker = yf.Ticker(symbol)
+            
+            # Create session with SSL settings
+            session = requests.Session()
+            session.verify = self.verify_ssl
+            ticker.session = session
             
             # Get available expiration dates
             expirations = ticker.options

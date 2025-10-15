@@ -4,6 +4,7 @@ Shows complete workflow from data download to performance analysis
 """
 
 import sys
+import argparse
 from pathlib import Path
 import pandas as pd
 from loguru import logger
@@ -23,30 +24,49 @@ from qvp.analytics.performance import PerformanceMetrics, generate_tearsheet
 from qvp.config import config
 
 
+def parse_args():
+    """Parse command line arguments"""
+    parser = argparse.ArgumentParser(description='Run QVP backtest demonstration')
+    parser.add_argument(
+        '--native-tls',
+        action='store_true',
+        help='Use native TLS (disable SSL verification)'
+    )
+    parser.add_argument(
+        '--force-download',
+        action='store_true',
+        help='Force re-download of data even if cached'
+    )
+    return parser.parse_args()
+
+
 def main():
     """
     Run complete QVP demonstration
     """
+    # Parse command line arguments
+    args = parse_args()
+    
     logger.info("=" * 80)
     logger.info("QVP - Quantitative Volatility Platform Demo")
     logger.info("=" * 80)
     
     # Step 1: Download data
     logger.info("\n[Step 1] Downloading market data...")
-    ingester = DataIngester()
+    ingester = DataIngester(verify_ssl=not args.native_tls)
     
     # Download SPY and VIX data
     equity_data = ingester.download_equity_data(
         symbols=['SPY'],
         start_date='2021-01-01',
         end_date='2024-12-31',
-        force_download=False
+        force_download=args.force_download
     )
     
     vix_data = ingester.download_vix_data(
         start_date='2021-01-01',
         end_date='2024-12-31',
-        force_download=False
+        force_download=args.force_download
     )
     
     if 'SPY' not in equity_data or vix_data.empty:
